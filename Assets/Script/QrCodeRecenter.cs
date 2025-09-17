@@ -83,22 +83,42 @@ public class QRCodeRecenter : MonoBehaviour
         }
     }
 
-    private void SetQrCodeRecenterTarget(string targetText)
+   private void SetQrCodeRecenterTarget(string targetText)
+{
+    Target currentTarget = navigationTargetObjects.Find(
+        x => x.Name.ToLower().Equals(targetText.ToLower())
+    );
+
+    if (currentTarget != null)
     {
-        Target currentTarget = navigationTargetObjects.Find(
-            x => x.Name.ToLower().Equals(targetText.ToLower())
-        );
+        // Reset tracking
+        session.Reset();
 
-        if (currentTarget != null)
+        // Move player to target position
+        xrOrigin.MoveCameraToWorldLocation(currentTarget.PositionObject.transform.position);
+
+        // --- Orientation handling ---
+        if (currentTarget.DesiredFacing != null)
         {
-            // Reset tracking
-            session.Reset();
-
-            // Recenter the XR Origin to match the target position
-            xrOrigin.MoveCameraToWorldLocation(currentTarget.PositionObject.transform.position);
-
-            // Optional: Also match rotation
-            xrOrigin.transform.rotation = currentTarget.PositionObject.transform.rotation;
+            // Use the desired facing direction from the Target
+            Vector3 forward = currentTarget.DesiredFacing.forward;
+            forward.y = 0f; // keep upright
+            if (forward.sqrMagnitude > 0.001f)
+            {
+                xrOrigin.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            }
+        }
+        else
+        {
+            // Default: face the PositionObject's forward direction
+            Vector3 forward = currentTarget.PositionObject.transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude > 0.001f)
+            {
+                xrOrigin.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            }
         }
     }
+}
+
 }

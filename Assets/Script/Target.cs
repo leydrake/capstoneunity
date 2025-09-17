@@ -10,5 +10,5 @@ public class Target
 {
     public string Name;
     public GameObject PositionObject;
-
+  public Transform DesiredFacing;   // optional: where you should look
 }

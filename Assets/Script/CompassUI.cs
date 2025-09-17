@@ -4,20 +4,26 @@ using UnityEngine.UI;
 public class CompassUI : MonoBehaviour
 {
     public RectTransform compassArrow;
+    public float smoothSpeed = 5f; // Higher = faster, Lower = smoother
 
     void Start()
     {
-        // Enable compass on phone
         Input.compass.enabled = true;
-        Input.location.Start(); // sometimes needed to unlock compass
+        Input.location.Start();
     }
 
     void Update()
     {
-        // Heading in degrees (0 = North)
-        float heading = Input.compass.trueHeading;
+        // Target heading (0 = North)
+        float targetHeading = Input.compass.trueHeading;
 
-        // Rotate arrow inside UI (negative because UI y-axis flips)
-        compassArrow.localEulerAngles = new Vector3(0, 0, -heading);
+        // Get current z rotation
+        float currentZ = compassArrow.localEulerAngles.z;
+
+        // Compute smooth rotation (interpolating angles properly)
+        float newZ = Mathf.LerpAngle(currentZ, -targetHeading, Time.deltaTime * smoothSpeed);
+
+        // Apply
+        compassArrow.localEulerAngles = new Vector3(0, 0, newZ);
     }
 }
